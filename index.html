@@ -954,10 +954,32 @@
       font-size: 0.75rem;
       color: #9ca3af;
       text-align: center;
-      margin-top: 4px;
+      margin-top: 8px;
     }
 
     .success-step { display: none; }
+
+    .paid-btn {
+      width: 100%;
+      padding: 16px;
+      background: #10B981;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Be Vietnam Pro', sans-serif;
+      transition: all 0.2s;
+      box-shadow: 0 4px 16px rgba(16,185,129,0.35);
+    }
+
+    .paid-btn:hover { background: #059669; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(16,185,129,0.45); }
+    .paid-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+
+    /* Modal scrollable trên mobile */
+    .modal-overlay { align-items: flex-start; padding: 16px; overflow-y: auto; }
+    .modal-box { margin: auto; max-height: none; }
 
     /* ===== QR MODAL ===== */
     .modal-overlay {
@@ -2274,11 +2296,13 @@
   <div class="modal-box">
     <button class="modal-close" onclick="closeQR()">✕</button>
 
-    <!-- BƯỚC 1: FORM -->
-    <div id="reg-form-step">
-      <div class="modal-title">Điền thông tin đăng ký</div>
-      <div class="modal-subtitle">Chúng tôi sẽ liên hệ xác nhận sau khi bạn chuyển khoản</div>
-      <div class="reg-form">
+    <!-- MÀN HÌNH CHÍNH: FORM + QR -->
+    <div id="main-step">
+      <div class="modal-title">Đăng ký & Thanh toán</div>
+      <div class="modal-subtitle">Điền thông tin rồi quét mã QR để hoàn tất</div>
+
+      <!-- FORM -->
+      <div class="reg-form" style="margin-top:16px;">
         <div class="form-group">
           <label>Họ và tên *</label>
           <input type="text" id="reg-name" placeholder="Nguyễn Văn A" />
@@ -2287,18 +2311,16 @@
           <label>Số điện thoại *</label>
           <input type="tel" id="reg-phone" placeholder="0912 345 678" />
         </div>
-        <button class="form-submit-btn" id="submit-btn" onclick="submitRegistration()">
-          Xác Nhận & Thanh Toán →
-        </button>
-        <p class="form-note">🔒 Thông tin của bạn được bảo mật hoàn toàn</p>
       </div>
-    </div>
 
-    <!-- BƯỚC 2: QR CODE -->
-    <div id="qr-step" class="success-step">
-      <div class="modal-title">Thanh toán để hoàn tất đăng ký</div>
-      <div class="modal-subtitle">Quét mã QR bên dưới để chuyển khoản</div>
+      <!-- DIVIDER -->
+      <div style="display:flex;align-items:center;gap:10px;margin:18px 0;">
+        <div style="flex:1;height:1px;background:#e5e7eb;"></div>
+        <span style="font-size:0.78rem;color:#9ca3af;font-weight:600;">QUÉT MÃ ĐỂ CHUYỂN KHOẢN</span>
+        <div style="flex:1;height:1px;background:#e5e7eb;"></div>
+      </div>
 
+      <!-- QR -->
       <div class="bank-logos">
         <div class="vietqr-logo"><span>V</span>IETQR™</div>
         <div class="napas-logo">napas ✦</div>
@@ -2318,11 +2340,28 @@
         <div class="bank-amount">4,990,000 VND</div>
       </div>
 
-      <div class="transfer-note">
+      <div class="transfer-note" style="margin-bottom:16px;">
         <div class="transfer-note-label">📝 Nội dung chuyển khoản</div>
-        <div class="transfer-note-value" id="transfer-content">HỌ TÊN + SỐ ĐIỆN THOẠI</div>
+        <div class="transfer-note-value">HỌ TÊN + SỐ ĐIỆN THOẠI</div>
         <div class="transfer-note-example">Ví dụ: Nguyen Van A 0912345678</div>
       </div>
+
+      <!-- NÚT XÁC NHẬN ĐÃ THANH TOÁN -->
+      <button class="paid-btn" id="paid-btn" onclick="confirmPayment()">
+        ✅ Tôi đã thanh toán thành công
+      </button>
+      <p class="form-note">🔒 Thông tin của bạn được bảo mật hoàn toàn</p>
+    </div>
+
+    <!-- MÀN HÌNH THÀNH CÔNG -->
+    <div id="success-step" style="display:none;text-align:center;padding:20px 0;">
+      <div style="font-size:3.5rem;margin-bottom:16px;">🎉</div>
+      <div class="modal-title" style="font-size:1.2rem;">Cảm ơn bạn đã đăng ký!</div>
+      <div class="modal-subtitle" style="margin-top:8px;">Chúng tôi đã nhận được thông tin và sẽ liên hệ xác nhận với bạn qua SĐT trong thời gian sớm nhất.</div>
+      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:16px;margin-top:20px;font-size:0.88rem;color:#166534;line-height:1.6;">
+        📱 Nếu chưa được liên hệ sau <strong>30 phút</strong>, vui lòng nhắn Zalo: <strong>0889472025</strong>
+      </div>
+      <button class="form-submit-btn" onclick="closeQR()" style="margin-top:20px;width:100%;">Đóng</button>
     </div>
 
   </div>
@@ -2396,47 +2435,47 @@
     } catch(e) {}
   }
 
-  // Xử lý submit form
-  async function submitRegistration() {
+  // Xác nhận đã thanh toán → gửi thông báo
+  async function confirmPayment() {
     const name  = document.getElementById('reg-name').value.trim();
     const phone = document.getElementById('reg-phone').value.trim();
 
     if (!name) {
       document.getElementById('reg-name').focus();
       document.getElementById('reg-name').style.borderColor = '#ef4444';
+      document.getElementById('reg-name').scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
     if (!phone || phone.replace(/\D/g,'').length < 9) {
       document.getElementById('reg-phone').focus();
       document.getElementById('reg-phone').style.borderColor = '#ef4444';
+      document.getElementById('reg-phone').scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
 
-    const btn = document.getElementById('submit-btn');
+    const btn = document.getElementById('paid-btn');
     btn.disabled = true;
-    btn.textContent = 'Đang xử lý...';
+    btn.textContent = '⏳ Đang gửi xác nhận...';
 
     await sendToScript(name, phone);
 
-    // Điền tên vào nội dung chuyển khoản gợi ý
-    document.getElementById('transfer-content').textContent = name + ' ' + phone;
-
-    // Chuyển sang bước QR
-    document.getElementById('reg-form-step').style.display = 'none';
-    document.getElementById('qr-step').style.display    = 'block';
-
-    btn.disabled = false;
-    btn.textContent = 'Xác Nhận & Thanh Toán →';
+    // Hiện màn hình thành công
+    document.getElementById('main-step').style.display    = 'none';
+    document.getElementById('success-step').style.display = 'block';
+    document.getElementById('qrModal').scrollTop = 0;
   }
 
-  // Reset form khi đóng modal
+  // Reset form khi mở modal
   function openQR() {
-    document.getElementById('reg-form-step').style.display = 'block';
-    document.getElementById('qr-step').style.display       = 'none';
+    document.getElementById('main-step').style.display    = 'block';
+    document.getElementById('success-step').style.display = 'none';
     document.getElementById('reg-name').value  = '';
     document.getElementById('reg-phone').value = '';
     document.getElementById('reg-name').style.borderColor  = '';
     document.getElementById('reg-phone').style.borderColor = '';
+    const btn = document.getElementById('paid-btn');
+    btn.disabled = false;
+    btn.textContent = '✅ Tôi đã thanh toán thành công';
     document.getElementById('qrModal').classList.add('active');
     document.body.style.overflow = 'hidden';
   }
