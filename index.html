@@ -2421,7 +2421,18 @@
   setTimeout(showNotif, 3000);
   setInterval(showNotif, 20000);
 
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwKcHtouQHur9CpcEVKAWyUvVaVoGO_K2o4gPMwr3ymDW6zM_xGzj61PLImTtoRocqJ/exec';
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxxwdRQ5JkuFBOGjV1m3GZEZ2fSfS-2KNVzdgCsOWOJmYsJyBJFlwOp1PiWpG4Adbw7/exec';
+
+  // Ghi nhận lượt truy cập khi vào trang
+  (function trackVisit() {
+    try {
+      fetch(SCRIPT_URL, {
+        method: 'POST', mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ type: 'visit', ref: document.referrer || 'direct' })
+      });
+    } catch(e) {}
+  })();
 
   // Gửi dữ liệu → Apps Script (tự ghi Sheet + gửi Telegram)
   async function sendToScript(name, phone) {
