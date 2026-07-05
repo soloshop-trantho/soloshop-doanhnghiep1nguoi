@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SoloShop Analytics</title>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    /* ── TOKENS ── */
+    :root {
+      --bg:          #0C1220;
+      --surface:     #141B2D;
+      --surface-hi:  #1D2640;
+      --border:      #263257;
+      --border-hi:   #3B4F7A;
+      --text:        #EEF2F8;
+      --muted:       #8B98B5;
+      --dim:         #5A6A8A;
+      --c-visits:    #60A5FA;
+      --c-orders:    #FF6B2B;
+      --c-revenue:   #34D399;
+      --c-conv:      #C084FC;
+      --c-good:      #22C55E;
+      --c-warn:      #F59E0B;
+      --c-bad:       #F87171;
+      --font:        'Be Vietnam Pro', system-ui, sans-serif;
+      --radius:      12px;
+      --radius-sm:   8px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── LOGIN SCREEN ── */
+    #login-screen {
+      position: fixed; inset: 0; z-index: 900;
+      background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .login-wrap {
+      width: min(400px, calc(100vw - 32px));
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px 36px;
+      text-align: center;
+    }
+
+    .login-brand {
+      font-size: 28px; font-weight: 800;
+      background: linear-gradient(120deg, #FF6B2B, #FFB347);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 4px;
+    }
+
+    .login-sub { font-size: 13px; color: var(--muted); margin-bottom: 32px; }
+
+    .login-label { display: block; text-align: left; font-size: 12px; font-weight: 600;
+      color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
+
+    .login-input {
+      width: 100%; background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 12px 14px;
+      color: var(--text); font-family: var(--font); font-size: 14px;
+      outline: none; transition: border-color .2s; margin-bottom: 16px;
+    }
+    .login-input:focus { border-color: var(--c-orders); }
+
+    .login-btn {
+      width: 100%; background: linear-gradient(135deg, #FF6B2B, #FF8C42);
+      border: none; border-radius: var(--radius-sm); padding: 13px;
+      color: #fff; font-family: var(--font); font-size: 14px; font-weight: 700;
+      cursor: pointer; transition: opacity .2s; letter-spacing: .02em;
+    }
+    .login-btn:hover { opacity: .88; }
+
+    .login-err {
+      margin-top: 12px; font-size: 13px; color: var(--c-bad);
+      display: none;
+    }
+
+    /* ── DASHBOARD ── */
+    #dashboard { display: none; }
+
+    /* Header */
+    .hdr {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 56px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    .hdr-left { display: flex; align-items: center; gap: 12px; }
+
+    .hdr-brand {
+      font-size: 18px; font-weight: 800;
+      background: linear-gradient(120deg, #FF6B2B, #FFB347);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    .hdr-sep { width: 1px; height: 20px; background: var(--border); }
+
+    .hdr-title { font-size: 13px; color: var(--muted); font-weight: 500; }
+
+    .hdr-right { display: flex; align-items: center; gap: 12px; }
+
+    .live-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(34,197,94,.12); color: var(--c-good);
+      border: 1px solid rgba(34,197,94,.25);
+      font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+      padding: 4px 10px; border-radius: 20px;
+    }
+    .live-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--c-good);
+      animation: blink 1.4s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+    .updated-at { font-size: 12px; color: var(--dim); }
+
+    .refresh-btn {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--surface-hi); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 7px 13px;
+      color: var(--muted); font-family: var(--font); font-size: 13px;
+      cursor: pointer; transition: background .15s, color .15s;
+    }
+    .refresh-btn:hover { background: var(--border); color: var(--text); }
+
+    .spin-icon { display: inline-block; font-style: normal; }
+    .spin-icon.spinning { animation: spin .7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Main layout */
+    .main {
+      max-width: 1380px; margin: 0 auto;
+      padding: 24px 24px 48px;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .toolbar-heading { font-size: 17px; font-weight: 700; }
+
+    .range-tabs {
+      display: flex; background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 3px; gap: 2px;
+    }
+
+    .range-tab {
+      padding: 7px 16px; border-radius: 7px;
+      border: none; background: none;
+      font-family: var(--font); font-size: 13px; font-weight: 600;
+      color: var(--muted); cursor: pointer; transition: all .18s;
+    }
+    .range-tab.active { background: var(--c-orders); color: #fff; }
+    .range-tab:not(.active):hover { color: var(--text); background: var(--surface-hi); }
+
+    /* KPI grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      position: relative; overflow: hidden;
+    }
+    .kpi-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 2px;
+      border-radius: var(--radius) var(--radius) 0 0;
+    }
+    .kpi-card.visits::after  { background: var(--c-visits); }
+    .kpi-card.orders::after  { background: var(--c-orders); }
+    .kpi-card.revenue::after { background: var(--c-revenue); }
+    .kpi-card.conv::after    { background: var(--c-conv); }
+
+    .kpi-row1 { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+
+    .kpi-eyebrow {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .07em; color: var(--muted);
+    }
+
+    .kpi-icon {
+      width: 30px; height: 30px; border-radius: 7px;
+      display: flex; align-items: center; justify-content: center; font-size: 15px;
+    }
+    .visits  .kpi-icon { background: rgba(96,165,250,.15); }
+    .orders  .kpi-icon { background: rgba(255,107,43,.15); }
+    .revenue .kpi-icon { background: rgba(52,211,153,.15); }
+    .conv    .kpi-icon { background: rgba(192,132,252,.15); }
+
+    .kpi-value {
+      font-size: 34px; font-weight: 800; line-height: 1;
+      font-variant-numeric: tabular-nums;
+      margin-bottom: 4px;
+    }
+    .visits  .kpi-value { color: var(--c-visits); }
+    .orders  .kpi-value { color: var(--c-orders); }
+    .revenue .kpi-value { color: var(--c-revenue); }
+    .conv    .kpi-value { color: var(--c-conv); }
+
+    .kpi-sub { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+
+    .kpi-spark { height: 38px; }
+
+    /* Chart section */
+    .charts-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .chart-hdr {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .chart-title { font-size: 14px; font-weight: 700; }
+
+    .chart-chip {
+      font-size: 11px; font-weight: 700; padding: 4px 10px;
+      border-radius: 20px;
+    }
+    .chip-visits  { background: rgba(96,165,250,.15); color: var(--c-visits); }
+    .chip-orders  { background: rgba(255,107,43,.15); color: var(--c-orders); }
+    .chip-revenue { background: rgba(52,211,153,.15); color: var(--c-revenue); }
+
+    .chart-area { position: relative; height: 200px; }
+
+    /* Orders table */
+    .table-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .table-hdr {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .table-title { font-size: 14px; font-weight: 700; }
+    .table-count { font-size: 12px; color: var(--muted); }
+
+    .tbl-wrap { overflow-x: auto; }
+
+    table { width: 100%; border-collapse: collapse; }
+
+    thead th {
+      text-align: left; padding: 11px 20px;
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+      color: var(--muted); background: var(--surface-hi);
+      border-bottom: 1px solid var(--border);
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background .12s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--surface-hi); }
+
+    tbody td {
+      padding: 13px 20px; font-size: 14px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .new-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: rgba(34,197,94,.15); color: var(--c-good);
+      font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px;
+    }
+    .new-badge::before {
+      content: ''; width: 5px; height: 5px; border-radius: 50%;
+      background: var(--c-good); animation: blink 1.4s infinite;
+    }
+
+    .conf-badge {
+      font-size: 11px; color: var(--dim);
+    }
+
+    /* Empty state */
+    .empty {
+      padding: 48px; text-align: center; color: var(--muted);
+    }
+    .empty-icon { font-size: 36px; margin-bottom: 12px; }
+    .empty-text { font-size: 14px; }
+
+    /* Demo notice */
+    .demo-notice {
+      display: none;
+      background: rgba(245,158,11,.1);
+      border: 1px solid rgba(245,158,11,.3);
+      border-radius: var(--radius-sm);
+      padding: 10px 16px;
+      font-size: 13px; color: var(--c-warn);
+      margin-bottom: 20px;
+    }
+
+    /* Responsive */
+    @media (max-width: 1100px) {
+      .kpi-grid { grid-template-columns: repeat(2,1fr); }
+    }
+    @media (max-width: 700px) {
+      .kpi-grid { grid-template-columns: 1fr; }
+      .charts-row { grid-template-columns: 1fr; }
+      .main { padding: 16px 14px 40px; }
+      .kpi-value { font-size: 28px; }
+      .hdr { padding: 0 14px; }
+      .hdr-title, .updated-at { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════ LOGIN ══════════ -->
+<div id="login-screen">
+  <div class="login-wrap">
+    <div class="login-brand">SoloShop</div>
+    <div class="login-sub">Bảng điều khiển phân tích dữ liệu</div>
+    <label class="login-label">Mật khẩu quản trị</label>
+    <input id="pwd" type="password" class="login-input" placeholder="Nhập mật khẩu..."
+      onkeydown="if(event.key==='Enter') doLogin()" autofocus />
+    <button class="login-btn" onclick="doLogin()">🔐 Đăng nhập</button>
+    <div class="login-err" id="login-err">Mật khẩu không đúng. Vui lòng thử lại.</div>
+  </div>
+</div>
+
+<!-- ══════════ DASHBOARD ══════════ -->
+<div id="dashboard">
+
+  <!-- Header -->
+  <header class="hdr">
+    <div class="hdr-left">
+      <div class="hdr-brand">SoloShop</div>
+      <div class="hdr-sep"></div>
+      <div class="hdr-title">Analytics Dashboard</div>
+    </div>
+    <div class="hdr-right">
+      <div class="live-chip"><span class="live-dot"></span>LIVE</div>
+      <div class="updated-at" id="updated-at">Đang tải...</div>
+      <button class="refresh-btn" onclick="loadData()">
+        <i class="spin-icon" id="spin">↻</i> Làm mới
+      </button>
+    </div>
+  </header>
+
+  <div class="main">
+
+    <!-- Demo notice -->
+    <div class="demo-notice" id="demo-notice">
+      ⚠️ Đang hiển thị dữ liệu demo. Cập nhật Apps Script theo hướng dẫn bên dưới để xem dữ liệu thật.
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="toolbar-heading">Tổng quan hoạt động</div>
+      <div class="range-tabs">
+        <button class="range-tab active" data-range="24h" onclick="setRange('24h',this)">24 giờ</button>
+        <button class="range-tab" data-range="7d"  onclick="setRange('7d',this)">7 ngày</button>
+        <button class="range-tab" data-range="30d" onclick="setRange('30d',this)">30 ngày</button>
+      </div>
+    </div>
+
+    <!-- KPI tiles -->
+    <div class="kpi-grid">
+      <div class="kpi-card visits">
+        <div class="kpi-row1">
+          <div class="kpi-eyebrow">Lượt truy cập</div>
+          <div class="kpi-icon">👁️</div>
+        </div>
+        <div class="kpi-value" id="v-visits">—</div>
+        <div class="kpi-sub">lượt xem trang</div>
+        <canvas class="kpi-spark" id="spark-visits"></canvas>
+      </div>
+      <div class="kpi-card orders">
+        <div class="kpi-row1">
+          <div class="kpi-eyebrow">Đơn hàng</div>
+          <div class="kpi-icon">📦</div>
+        </div>
+        <div class="kpi-value" id="v-orders">—</div>
+        <div class="kpi-sub">đơn đã xác nhận thanh toán</div>
+        <canvas class="kpi-spark" id="spark-orders"></canvas>
+      </div>
+      <div class="kpi-card revenue">
+        <div class="kpi-row1">
+          <div class="kpi-eyebrow">Doanh thu</div>
+          <div class="kpi-icon">💰</div>
+        </div>
+        <div class="kpi-value" id="v-revenue">—</div>
+        <div class="kpi-sub">ước tính × 4.990.000đ/đơn</div>
+        <canvas class="kpi-spark" id="spark-revenue"></canvas>
+      </div>
+      <div class="kpi-card conv">
+        <div class="kpi-row1">
+          <div class="kpi-eyebrow">Tỉ lệ chuyển đổi</div>
+          <div class="kpi-icon">📈</div>
+        </div>
+        <div class="kpi-value" id="v-conv">—</div>
+        <div class="kpi-sub">đơn hàng / lượt truy cập</div>
+        <canvas class="kpi-spark" id="spark-conv"></canvas>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-hdr">
+          <div class="chart-title">Lượt truy cập theo thời gian</div>
+          <span class="chart-chip chip-visits" id="chip-visits">—</span>
+        </div>
+        <div class="chart-area"><canvas id="chart-visits"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-hdr">
+          <div class="chart-title">Đơn hàng theo thời gian</div>
+          <span class="chart-chip chip-orders" id="chip-orders">—</span>
+        </div>
+        <div class="chart-area"><canvas id="chart-orders"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Revenue trend (full width) -->
+    <div class="chart-card" style="margin-bottom:20px">
+      <div class="chart-hdr">
+        <div class="chart-title">Doanh thu ước tính (VND)</div>
+        <span class="chart-chip chip-revenue" id="chip-revenue">—</span>
+      </div>
+      <div class="chart-area" style="height:180px"><canvas id="chart-revenue"></canvas></div>
+    </div>
+
+    <!-- Orders table -->
+    <div class="table-card">
+      <div class="table-hdr">
+        <div class="table-title">Đơn hàng gần đây</div>
+        <div class="table-count" id="tbl-count">—</div>
+      </div>
+      <div id="tbl-wrap" class="tbl-wrap">
+        <div class="empty"><div class="empty-icon">⏳</div><div class="empty-text">Đang tải dữ liệu...</div></div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /dashboard -->
+
+<script>
+/* ════════════ CONFIG ════════════ */
+const PASSWORD    = 'soloshop@admin2026';
+const SCRIPT_URL  = 'https://script.google.com/macros/s/AKfycbx2xjCNVzbzumaJHjyOlNZVjOrZjDbNtC3sFJH-ijcpJoX6z1y4Y5mTTVOz3Q4W0WeZ/exec';
+const PRICE       = 4990000;
+const REFRESH_SEC = 60;
+
+let range      = '24h';
+let cVisits    = null, cOrders = null, cRevenue = null;
+let sVisits    = null, sOrders = null, sRevenue = null, sConv = null;
+let countdown  = REFRESH_SEC;
+let tickHandle = null;
+
+/* ════════════ LOGIN ════════════ */
+function doLogin() {
+  if (document.getElementById('pwd').value === PASSWORD) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('dashboard').style.display   = 'block';
+    init();
+  } else {
+    document.getElementById('login-err').style.display = 'block';
+  }
+}
+
+function init() {
+  loadData();
+  clearInterval(tickHandle);
+  tickHandle = setInterval(() => {
+    countdown--;
+    if (countdown <= 0) { loadData(); countdown = REFRESH_SEC; }
+  }, 1000);
+}
+
+/* ════════════ RANGE ════════════ */
+function setRange(r, btn) {
+  range = r;
+  document.querySelectorAll('.range-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  loadData();
+}
+
+/* ════════════ FETCH ════════════ */
+async function loadData() {
+  const icon = document.getElementById('spin');
+  icon.classList.add('spinning');
+
+  let data;
+  try {
+    const res = await fetch(`${SCRIPT_URL}?action=analytics&range=${range}`);
+    if (!res.ok) throw new Error('non-200');
+    data = await res.json();
+    document.getElementById('demo-notice').style.display = 'none';
+  } catch {
+    data = makeDemo(range);
+    document.getElementById('demo-notice').style.display = 'block';
+  }
+
+  render(data);
+  document.getElementById('updated-at').textContent =
+    'Cập nhật: ' + new Date().toLocaleTimeString('vi-VN');
+  icon.classList.remove('spinning');
+  countdown = REFRESH_SEC;
+}
+
+/* ════════════ DEMO DATA ════════════ */
+function makeDemo(r) {
+  const now = new Date();
+  const labels = [], visits = [], orders = [];
+
+  if (r === '24h') {
+    for (let h = 23; h >= 0; h--) {
+      const d = new Date(now); d.setHours(d.getHours()-h,0,0,0);
+      labels.push(d.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'}));
+      const base = (d.getHours()>=8 && d.getHours()<=22) ? 35 : 8;
+      visits.push(Math.round(base + Math.random()*25));
+      orders.push(Math.random()>.72 ? Math.ceil(Math.random()*2) : 0);
+    }
+  } else {
+    const n = r==='7d' ? 7 : 30;
+    for (let d=n-1;d>=0;d--) {
+      const dt = new Date(now); dt.setDate(dt.getDate()-d);
+      labels.push(dt.toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit'}));
+      visits.push(Math.round(180+Math.random()*280));
+      orders.push(Math.round(4+Math.random()*14));
+    }
+  }
+
+  const tV = visits.reduce((a,b)=>a+b,0);
+  const tO = orders.reduce((a,b)=>a+b,0);
+
+  const fakeNames = ['Nguyễn Thị Lan','Trần Văn Nam','Lê Hoàng Anh','Phạm Thị Mai',
+    'Đỗ Quang Huy','Nguyễn Minh Tuấn','Vũ Thị Ngọc','Hoàng Thị Thu','Đinh Văn Bình','Cao Thị Hoa'];
+
+  const recent = Array.from({length:Math.min(tO,10)},(_,i)=>{
+    const t=new Date(now);
+    t.setHours(t.getHours()-Math.floor(i*(r==='24h'?1.8:r==='7d'?12:24)));
+    return { time:t.toLocaleString('vi-VN'), name:fakeNames[i%10], phone:'09xx xxx xxx', isNew:i===0 };
+  });
+
+  return { labels, visits, orders, totalVisits:tV, totalOrders:tO, recentOrders:recent };
+}
+
+/* ════════════ RENDER ════════════ */
+function render(d) {
+  const { labels, visits, orders, totalVisits, totalOrders, recentOrders } = d;
+  const rev  = totalOrders * PRICE;
+  const conv = totalVisits>0 ? ((totalOrders/totalVisits)*100).toFixed(1) : '0.0';
+
+  // KPI values
+  el('v-visits').textContent  = fmt(totalVisits);
+  el('v-orders').textContent  = fmt(totalOrders);
+  el('v-revenue').textContent = fmtMoney(rev);
+  el('v-conv').textContent    = conv + '%';
+
+  // Chip labels
+  el('chip-visits').textContent  = 'Tổng: ' + fmt(totalVisits);
+  el('chip-orders').textContent  = 'Tổng: ' + fmt(totalOrders);
+  el('chip-revenue').textContent = fmtMoney(rev) + 'đ';
+
+  // Main charts
+  cVisits  = drawLine('chart-visits',  labels, visits,  '#60A5FA', 'Lượt truy cập', cVisits);
+  cOrders  = drawLine('chart-orders',  labels, orders,  '#FF6B2B', 'Đơn hàng',      cOrders);
+  const revenues = orders.map(o => o * PRICE);
+  cRevenue = drawLine('chart-revenue', labels, revenues, '#34D399', 'Doanh thu',    cRevenue, v=>fmtMoney(v)+'đ');
+
+  // Sparklines
+  sVisits  = drawSpark('spark-visits',  visits,   '#60A5FA', sVisits);
+  sOrders  = drawSpark('spark-orders',  orders,   '#FF6B2B', sOrders);
+  sRevenue = drawSpark('spark-revenue', revenues, '#34D399', sRevenue);
+  sConv    = drawSpark('spark-conv',
+    visits.map((v,i)=>v>0?(orders[i]/v*100):0), '#C084FC', sConv);
+
+  // Table
+  el('tbl-count').textContent = recentOrders.length + ' đơn gần nhất';
+  renderTable(recentOrders);
+}
+
+/* ════════════ CHARTS ════════════ */
+const GRID  = 'rgba(38,50,87,0.55)';
+const TICK  = '#5A6A8A';
+const FONT  = { family: "'Be Vietnam Pro', system-ui", size: 11 };
+
+function drawLine(id, labels, data, color, label, existing, fmtTip) {
+  const canvas = document.getElementById(id);
+  const ctx = canvas.getContext('2d');
+
+  if (existing) existing.destroy();
+
+  // Thin labels if too many
+  const step = labels.length > 16 ? Math.ceil(labels.length / 9) : 1;
+  const shown = labels.map((l, i) => i % step === 0 ? l : '');
+
+  const grad = ctx.createLinearGradient(0, 0, 0, 200);
+  grad.addColorStop(0, color + '30');
+  grad.addColorStop(1, color + '00');
+
+  return new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: shown,
+      datasets: [{
+        label, data,
+        borderColor: color, borderWidth: 2,
+        pointBackgroundColor: color,
+        pointRadius: labels.length > 20 ? 0 : 3,
+        pointHoverRadius: 5,
+        fill: true, backgroundColor: grad,
+        tension: 0.42,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1D2640',
+          borderColor: '#263257', borderWidth: 1,
+          titleColor: '#8B98B5', bodyColor: '#EEF2F8',
+          titleFont: FONT, bodyFont: { ...FONT, weight: '700', size: 13 },
+          padding: 10, caretSize: 5,
+          callbacks: {
+            title: items => labels[items[0].dataIndex],
+            label: item => '  ' + (fmtTip ? fmtTip(item.raw) : item.raw.toLocaleString('vi-VN'))
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: GRID, drawTicks: false },
+          ticks: { color: TICK, font: FONT, maxRotation: 0 },
+          border: { display: false }
+        },
+        y: {
+          beginAtZero: true,
+          grid: { color: GRID, drawTicks: false },
+          ticks: {
+            color: TICK, font: FONT,
+            callback: v => fmtTip ? fmtMoney(v) : v.toLocaleString('vi-VN')
+          },
+          border: { display: false }
+        }
+      }
+    }
+  });
+}
+
+function drawSpark(id, data, color, existing) {
+  const canvas = document.getElementById(id);
+  const ctx    = canvas.getContext('2d');
+  if (existing) existing.destroy();
+
+  const grad = ctx.createLinearGradient(0, 0, 0, 38);
+  grad.addColorStop(0, color + '40');
+  grad.addColorStop(1, color + '00');
+
+  return new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: data.map((_,i)=>i),
+      datasets: [{ data, borderColor: color, borderWidth: 1.5,
+        pointRadius: 0, fill: true, backgroundColor: grad, tension: 0.42 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: { duration: 250 },
+      plugins: { legend:{display:false}, tooltip:{enabled:false} },
+      scales: { x:{display:false}, y:{display:false, beginAtZero:true} }
+    }
+  });
+}
+
+/* ════════════ TABLE ════════════ */
+function renderTable(orders) {
+  const wrap = document.getElementById('tbl-wrap');
+  if (!orders || orders.length === 0) {
+    wrap.innerHTML = `<div class="empty">
+      <div class="empty-icon">📭</div>
+      <div class="empty-text">Chưa có đơn hàng trong khoảng thời gian này</div>
+    </div>`;
+    return;
+  }
+
+  wrap.innerHTML = `<table>
+    <thead><tr>
+      <th>#</th><th>Thời gian</th><th>Họ tên</th><th>SĐT</th><th>Giá trị</th><th>Trạng thái</th>
+    </tr></thead>
+    <tbody>
+      ${orders.map((o,i) => `<tr>
+        <td style="color:var(--dim)">${i+1}</td>
+        <td style="color:var(--muted);font-size:13px">${o.time}</td>
+        <td style="font-weight:600">${o.name}</td>
+        <td style="color:var(--muted)">${o.phone}</td>
+        <td style="color:var(--c-revenue);font-weight:700;font-variant-numeric:tabular-nums">4.990.000đ</td>
+        <td>${o.isNew
+          ? '<span class="new-badge">Mới</span>'
+          : '<span class="conf-badge">✓ Xác nhận</span>'}</td>
+      </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+
+/* ════════════ HELPERS ════════════ */
+function el(id) { return document.getElementById(id); }
+function fmt(n) { return Number(n).toLocaleString('vi-VN'); }
+function fmtMoney(v) {
+  if (v >= 1e9)  return (v/1e9).toFixed(1)  + ' tỷ';
+  if (v >= 1e6)  return (v/1e6).toFixed(1)  + ' triệu';
+  if (v >= 1e3)  return (v/1e3).toFixed(0)  + 'K';
+  return v.toLocaleString('vi-VN');
+}
+</script>
+</body>
+</html>
