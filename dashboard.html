@@ -520,17 +520,39 @@ function setRange(r, btn) {
   loadData();
 }
 
-/* ════════════ FETCH ════════════ */
+/* ════════════ JSONP FETCH (bypass CORS) ════════════ */
+function jsonpFetch(url) {
+  return new Promise((resolve, reject) => {
+    const cbName = '__cb_' + Date.now();
+    const script = document.createElement('script');
+    const timer  = setTimeout(() => { cleanup(); reject(new Error('timeout')); }, 12000);
+
+    function cleanup() {
+      delete window[cbName];
+      clearTimeout(timer);
+      if (script.parentNode) script.parentNode.removeChild(script);
+    }
+
+    window[cbName] = (data) => { cleanup(); resolve(data); };
+    script.onerror = () => { cleanup(); reject(new Error('load error')); };
+    script.src = url + '&callback=' + cbName;
+    document.head.appendChild(script);
+  });
+}
+
+/* ════════════ LOAD DATA ════════════ */
 async function loadData() {
   const icon = document.getElementById('spin');
   icon.classList.add('spinning');
 
   let data;
   try {
-    const res = await fetch(`${SCRIPT_URL}?action=analytics&range=${range}`);
-    if (!res.ok) throw new Error('non-200');
-    data = await res.json();
-    document.getElementById('demo-notice').style.display = 'none';
+    data = await jsonpFetch(`${SCRIPT_URL}?action=analytics&range=${range}`);
+    if (data && data.labels) {
+      document.getElementById('demo-notice').style.display = 'none';
+    } else {
+      throw new Error('invalid data');
+    }
   } catch {
     data = makeDemo(range);
     document.getElementById('demo-notice').style.display = 'block';
@@ -691,6 +713,11 @@ function drawSpark(id, data, color, existing) {
   const ctx    = canvas.getContext('2d');
   if (existing) existing.destroy();
 
+  // Set explicit dimensions to prevent vertical-line bug
+  const w = canvas.parentElement.clientWidth || 200;
+  canvas.width  = w;
+  canvas.height = 38;
+
   const grad = ctx.createLinearGradient(0, 0, 0, 38);
   grad.addColorStop(0, color + '40');
   grad.addColorStop(1, color + '00');
@@ -703,7 +730,7 @@ function drawSpark(id, data, color, existing) {
         pointRadius: 0, fill: true, backgroundColor: grad, tension: 0.42 }]
     },
     options: {
-      responsive: true, maintainAspectRatio: false, animation: { duration: 250 },
+      responsive: false, maintainAspectRatio: false, animation: { duration: 250 },
       plugins: { legend:{display:false}, tooltip:{enabled:false} },
       scales: { x:{display:false}, y:{display:false, beginAtZero:true} }
     }
