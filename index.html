@@ -625,6 +625,107 @@
 
     .guarantee-icon { font-size: 1.2rem; }
 
+    /* ===== GIFT SECTION ===== */
+    .gift-section {
+      background: linear-gradient(135deg, #0d1526 0%, #0f1c10 100%);
+      padding: 80px 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .gift-section::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: 50%;
+      transform: translateX(-50%);
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(16,185,129,.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .gift-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(16,185,129,.15);
+      border: 1px solid rgba(16,185,129,.35);
+      color: #10B981;
+      font-size: 12px; font-weight: 800;
+      text-transform: uppercase; letter-spacing: .08em;
+      padding: 6px 16px; border-radius: 20px;
+      margin-bottom: 16px;
+    }
+    .gift-title {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 900; line-height: 1.2;
+      margin-bottom: 12px;
+    }
+    .gift-title .hl-green {
+      background: linear-gradient(90deg, #10B981, #34D399);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .gift-card {
+      background: rgba(16,185,129,.06);
+      border: 1px solid rgba(16,185,129,.25);
+      border-radius: 20px;
+      padding: 32px;
+      margin-top: 40px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      align-items: start;
+    }
+    @media (max-width: 768px) { .gift-card { grid-template-columns: 1fr; } }
+    .gift-item-header {
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 20px;
+    }
+    .gift-icon-box {
+      width: 56px; height: 56px; border-radius: 14px;
+      background: linear-gradient(135deg, #10B981, #059669);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px; flex-shrink: 0;
+      box-shadow: 0 4px 20px rgba(16,185,129,.35);
+    }
+    .gift-item-name {
+      font-size: 1.1rem; font-weight: 800; color: #fff;
+      margin-bottom: 4px;
+    }
+    .gift-item-sub { font-size: 13px; color: #10B981; font-weight: 600; }
+    .gift-desc { font-size: 14px; color: var(--text-muted); line-height: 1.75; margin-bottom: 18px; }
+    .gift-highlights { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .gift-highlights li {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 14px; color: var(--text);
+    }
+    .gift-highlights li::before {
+      content: '✦';
+      color: #10B981; font-size: 12px; flex-shrink: 0;
+    }
+    .gift-video-wrap {
+      border-radius: 14px;
+      overflow: hidden;
+      aspect-ratio: 16/9;
+      border: 2px solid rgba(16,185,129,.2);
+      box-shadow: 0 8px 40px rgba(0,0,0,.4);
+    }
+    .gift-video-wrap iframe { width: 100%; height: 100%; border: none; display: block; }
+    .gift-video-label {
+      text-align: center; margin-top: 12px;
+      font-size: 13px; color: #10B981; font-weight: 600;
+    }
+    .gift-total-value {
+      margin-top: 32px;
+      background: rgba(16,185,129,.08);
+      border: 1px dashed rgba(16,185,129,.3);
+      border-radius: 12px;
+      padding: 18px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px;
+    }
+    .gift-total-label { font-size: 14px; color: var(--text-muted); }
+    .gift-total-price {
+      font-size: 1.3rem; font-weight: 900;
+      background: linear-gradient(90deg, #10B981, #34D399);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
     /* ===== FAQ ===== */
     .faq-section { background: var(--dark); }
 
@@ -2056,6 +2157,54 @@
 </section>
 
 <!-- PRICING -->
+<!-- GIFT SECTION -->
+<section class="gift-section">
+  <div class="container">
+    <div style="text-align:center">
+      <div class="gift-badge">🎁 Quà Tặng Đặc Biệt</div>
+      <h2 class="gift-title">Tham gia SoloShop –<br /><span class="hl-green">Nhận ngay quà tặng miễn phí</span></h2>
+      <p class="section-desc" style="margin: 0 auto; max-width:560px">Ngoài toàn bộ hệ thống kinh doanh, bạn còn được nhận thêm những công cụ giá trị này hoàn toàn miễn phí.</p>
+    </div>
+
+    <div class="gift-card">
+      <!-- LEFT: Info -->
+      <div>
+        <div class="gift-item-header">
+          <div class="gift-icon-box">🎨</div>
+          <div>
+            <div class="gift-item-name">App Tạo Ảnh & Video AI</div>
+            <div class="gift-item-sub">Không tốn credit · Dùng ngay · Miễn phí</div>
+          </div>
+        </div>
+        <p class="gift-desc">Tạo ảnh sản phẩm đẹp và video quảng cáo chuyên nghiệp bằng AI — không cần thuê designer, không tốn credit, áp dụng ngay cho cửa hàng của bạn.</p>
+        <ul class="gift-highlights">
+          <li>Tạo ảnh sản phẩm chất lượng cao bằng AI</li>
+          <li>Tạo video quảng cáo không cần quay thật</li>
+          <li>Không tốn credit, không giới hạn số lượng</li>
+          <li>Dùng ngay sau khi tham gia — không chờ đợi</li>
+        </ul>
+        <div class="gift-total-value" style="margin-top:24px">
+          <div class="gift-total-label">🎁 Trị giá quà tặng</div>
+          <div class="gift-total-price">MIỄN PHÍ 100%</div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Video -->
+      <div>
+        <div class="gift-video-wrap">
+          <iframe
+            src="https://www.youtube.com/embed/QZzHbNASDV8?rel=0&modestbranding=1"
+            title="Hướng dẫn tạo ảnh, tạo video không tốn credit"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen>
+          </iframe>
+        </div>
+        <div class="gift-video-label">▶ Xem trước: Hướng dẫn tạo ảnh & video AI miễn phí</div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="pricing-section" id="pricing">
   <div class="container">
     <div style="text-align: center;">
@@ -2077,6 +2226,7 @@
           <li><span class="tick">✅</span> Tham gia cộng đồng học viên & chia sẻ kinh nghiệm thực tế</li>
           <li><span class="tick">✅</span> Hỗ trợ cá nhân hóa – được tư vấn, giải đáp trực tiếp khi cần</li>
           <li><span class="tick">✅</span> Tự chủ định giá – không ai can thiệp lợi nhuận của bạn</li>
+          <li><span class="tick">🎁</span> <strong>TẶNG THÊM:</strong> App tạo ảnh & video AI không tốn credit + video hướng dẫn chi tiết</li>
         </ul>
         <div class="price-display">
           <span class="price-old">Giá thông thường: 8.000.000đ</span>
