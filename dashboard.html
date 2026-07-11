@@ -89,7 +89,7 @@
     }
 
     /* ── DASHBOARD ── */
-    #dashboard { display: none; }
+    #dashboard { display: block; }
 
     /* Header */
     .hdr {
@@ -349,18 +349,6 @@
 </head>
 <body>
 
-<!-- ══════════ LOGIN ══════════ -->
-<div id="login-screen">
-  <div class="login-wrap">
-    <div class="login-brand">SoloShop</div>
-    <div class="login-sub">Bảng điều khiển phân tích dữ liệu</div>
-    <label class="login-label">Mật khẩu quản trị</label>
-    <input id="pwd" type="password" class="login-input" placeholder="Nhập mật khẩu..."
-      onkeydown="if(event.key==='Enter') doLogin()" autofocus />
-    <button class="login-btn" onclick="doLogin()">🔐 Đăng nhập</button>
-    <div class="login-err" id="login-err">Mật khẩu không đúng. Vui lòng thử lại.</div>
-  </div>
-</div>
 
 <!-- ══════════ DASHBOARD ══════════ -->
 <div id="dashboard">
@@ -481,7 +469,6 @@
 
 <script>
 /* ════════════ CONFIG ════════════ */
-const PASSWORD    = 'soloshop@admin2026';
 const SCRIPT_URL  = 'https://script.google.com/macros/s/AKfycbxxwdRQ5JkuFBOGjV1m3GZEZ2fSfS-2KNVzdgCsOWOJmYsJyBJFlwOp1PiWpG4Adbw7/exec';
 const PRICE       = 4990000;
 const REFRESH_SEC = 60;
@@ -491,17 +478,6 @@ let cVisits    = null, cOrders = null, cRevenue = null;
 let sVisits    = null, sOrders = null, sRevenue = null, sConv = null;
 let countdown  = REFRESH_SEC;
 let tickHandle = null;
-
-/* ════════════ LOGIN ════════════ */
-function doLogin() {
-  if (document.getElementById('pwd').value === PASSWORD) {
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('dashboard').style.display   = 'block';
-    init();
-  } else {
-    document.getElementById('login-err').style.display = 'block';
-  }
-}
 
 function init() {
   loadData();
@@ -776,6 +752,8 @@ function fmtMoney(v) {
   if (v >= 1e3)  return (v/1e3).toFixed(0)  + 'K';
   return v.toLocaleString('vi-VN');
 }
+
+init();
 </script>
 </body>
 </html>
