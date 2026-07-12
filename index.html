@@ -2523,14 +2523,45 @@
     </div>
 
     <!-- MÀN HÌNH THÀNH CÔNG -->
-    <div id="success-step" style="display:none;text-align:center;padding:20px 0;">
-      <div style="font-size:3.5rem;margin-bottom:16px;">🎉</div>
-      <div class="modal-title" style="font-size:1.2rem;">Cảm ơn bạn đã đăng ký!</div>
-      <div class="modal-subtitle" style="margin-top:8px;">Chúng tôi đã nhận được thông tin và sẽ liên hệ xác nhận với bạn qua SĐT trong thời gian sớm nhất.</div>
-      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:16px;margin-top:20px;font-size:0.88rem;color:#166534;line-height:1.6;">
-        📱 Nếu chưa được liên hệ sau <strong>30 phút</strong>, vui lòng nhắn Zalo: <strong>0889472025</strong>
+    <div id="success-step" style="display:none;margin:-36px -32px -32px;border-radius:24px;
+         background:linear-gradient(160deg,#0f172a 0%,#1e293b 100%);
+         padding:32px 24px 28px;text-align:center;">
+      <div style="font-size:3.8rem;margin-bottom:12px;">🎉</div>
+      <div style="font-size:1.25rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em;
+                  background:linear-gradient(90deg,#FFD200,#FF8C38);
+                  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+                  margin-bottom:14px;">
+        Đăng Ký Thành Công!
       </div>
-      <button class="form-submit-btn" onclick="closeQR()" style="margin-top:20px;width:100%;">Đóng</button>
+      <p style="font-size:14px;color:#e2e8f0;line-height:1.8;margin-bottom:6px;">
+        Cảm ơn <strong id="success-name" style="color:#FFD200;font-weight:900;text-transform:uppercase"></strong>
+        đã để lại thông tin. Mentor sẽ liên hệ bạn qua Zalo/SĐT sớm nhất có thể.
+      </p>
+      <p style="font-size:13px;color:#94a3b8;line-height:1.7;margin-bottom:20px;">
+        Thông tin đã được ghi nhận vào hệ thống.
+      </p>
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+                  border-radius:14px;padding:16px 18px;text-align:left;margin-bottom:20px;">
+        <p style="font-size:13px;color:#cbd5e1;line-height:1.8;margin-bottom:10px;">
+          🏦 Sau khi chuyển khoản tham gia<br>
+          <strong style="color:#fff;font-size:14px;">SoloShop – Hệ Thống Kinh Doanh Online</strong><br>
+          <span style="color:#94a3b8;">hãy nhắn ngay để được kích hoạt:</span>
+        </p>
+        <div style="display:flex;align-items:center;gap:12px;background:rgba(255,140,0,.12);
+                    border:1px solid rgba(255,140,0,.3);border-radius:10px;padding:12px 16px;">
+          <span style="font-size:24px">🧑‍💼</span>
+          <div>
+            <div style="font-size:14px;font-weight:800;color:#fff;">Mentor Trần Văn Thọ</div>
+            <div style="font-size:14px;color:#FF8C38;font-weight:700;">Zalo: <strong>0889472025</strong></div>
+          </div>
+        </div>
+      </div>
+      <button onclick="closeQR()" style="width:100%;padding:15px;border:none;border-radius:12px;
+              background:linear-gradient(135deg,#FF6B00,#FFD200);
+              font-family:'Be Vietnam Pro',sans-serif;font-size:15px;font-weight:800;
+              color:#fff;cursor:pointer;letter-spacing:.03em;box-shadow:0 4px 20px rgba(255,107,0,.4);">
+        Đã hiểu 🎉
+      </button>
     </div>
 
   </div>
@@ -2640,6 +2671,7 @@
     await sendToScript(name, phone);
 
     // Hiện màn hình thành công
+    document.getElementById('success-name').textContent   = name;
     document.getElementById('main-step').style.display    = 'none';
     document.getElementById('success-step').style.display = 'block';
     document.getElementById('qrModal').scrollTop = 0;
